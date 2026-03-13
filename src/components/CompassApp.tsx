@@ -14,11 +14,19 @@ interface UIMessage {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
 function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') return ''
   let id = localStorage.getItem('compass:sessionId')
   if (!id) {
-    id = crypto.randomUUID()
+    id = generateUUID()
     localStorage.setItem('compass:sessionId', id)
   }
   return id
@@ -232,7 +240,7 @@ export default function CompassApp() {
     setError('')
     setShowFollowUp(false)
 
-    const tempId = crypto.randomUUID()
+    const tempId = generateUUID()
     const tempMsg: UIMessage = {
       id: tempId,
       role: 'user',
@@ -260,7 +268,7 @@ export default function CompassApp() {
       if (!res.ok) throw new Error(data.error || 'Request failed')
 
       const assistantMsg: UIMessage = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         role: 'assistant',
         content: data.message,
         created_at: new Date().toISOString(),
@@ -305,7 +313,7 @@ export default function CompassApp() {
 
   const handleClearAll = async () => {
     if (!confirm('Clear all conversations and deadlines? This cannot be undone.')) return
-    const newId = crypto.randomUUID()
+    const newId = generateUUID()
     localStorage.setItem('compass:sessionId', newId)
     setSessionId(newId)
     setMessages([])
